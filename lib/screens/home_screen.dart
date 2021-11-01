@@ -1,15 +1,128 @@
 import 'dart:async';
 
+import 'package:provider/provider.dart';
+
 import 'package:flutter/material.dart';
+import 'package:green_phl/provider/data.dart';
 import 'package:green_phl/widget/background.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  HomePage({Key? key}) : super(key: key);
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _textEditingController = TextEditingController();
+  var isShowDialog = false;
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final dataProvider = Provider.of<Data>(context);
+    dataProvider.getLiveData();
+
+    Timer.periodic(Duration(seconds: 5), (timer) {
+      if (dataProvider.isNotSafe && !isShowDialog) {
+        isShowDialog = true;
+        showDialog(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: SizedBox(
+                width: double.infinity,
+                child: Text(
+                  "Warning!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'CO2 indicator is now OVERLOADED!',
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  Text(
+                    'Please UPDATE number of people',
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  Form(
+                    key: _formKey,
+                    child: TextFormField(
+                      controller: _textEditingController,
+                      validator: (value) {
+                        return value!.isNotEmpty
+                            ? null
+                            : "Please UPDATE the number of people present in your env";
+                      },
+                      keyboardType: TextInputType.number,
+                      decoration:
+                          const InputDecoration(hintText: "Member number"),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop(dataProvider.memberNum.toString());
+                    // isShowDialog = false;
+                    // dataProvider.changeState();
+                    isShowDialog = true;
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red[400]),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
+                  ),
+                  child: const Text(
+                    "No",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop(_textEditingController.text.isEmpty
+                        ? dataProvider.memberNum.toString()
+                        : _textEditingController.text.toString());
+                    isShowDialog = false;
+                  },
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20))),
+                      ),
+                      backgroundColor: MaterialStateProperty.all(Colors.cyan)),
+                  child: const Text(
+                    "Update",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ).then((value) => dataProvider.changePeopleNum(value));
+      }
+    });
     return SizedBox(
       height: size.height,
       width: size.width,
@@ -47,6 +160,7 @@ class MainCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<Data>(context);
     return SingleChildScrollView(
       child: Stack(
         children: [
@@ -70,25 +184,29 @@ class MainCircle extends StatelessWidget {
                 height: 248,
                 alignment: Alignment.center,
                 width: 248,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
                     Radius.circular(500),
                   ),
-                  color: Colors.lightGreenAccent,
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //     color: Colors.grey,
-                  //     offset: Offset(2, 2),
-                  //     blurRadius: 5,
-                  //   ),
-                  // ],
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black,
+                      offset: Offset(0, 0),
+                      blurRadius: 5,
+                    ),
+                  ],
+                  border: Border.all(style: BorderStyle.solid),
+                  // color: Colors.lightGreenAccent,
+                  color: dataProvider.isNotSafe
+                      ? Colors.red[400]
+                      : Colors.lightGreenAccent,
                 ),
-                child: const Text(
-                  "700 ppm CO2",
+                child: Text(
+                  dataProvider.isNotSafe ? 'WARNING!' : "SAFE",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 30,
-                    color: Colors.black,
+                    color: dataProvider.isNotSafe ? Colors.white : Colors.cyan,
                   ),
                 ),
               ),
@@ -120,11 +238,59 @@ class CircularSpin extends StatelessWidget {
   }
 }
 
-class InformationWidget extends StatelessWidget {
+class InformationWidget extends StatefulWidget {
   const InformationWidget({Key? key}) : super(key: key);
 
   @override
+  State<InformationWidget> createState() => _InformationWidgetState();
+}
+
+class _InformationWidgetState extends State<InformationWidget> {
+  var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      //load init
+      Provider.of<Data>(context, listen: false).getLiveData().then(
+            (_) => {
+              setState(() {
+                _isLoading = false;
+              })
+            },
+          );
+
+      //create a periodTimer
+      Timer.periodic(const Duration(seconds: 10), (timer) {
+        setState(
+          () {
+            _isLoading = true;
+            Provider.of<Data>(context, listen: false).getLiveData().then(
+                  (value) => {
+                    setState(() {
+                      _isLoading = false;
+                    })
+                  },
+                );
+          },
+        );
+      });
+    }
+    _isInit = false;
+
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<Data>(context);
+    Size size = MediaQuery.of(context).size;
+    print('${size.height}   ${size.width}');
+    // dataProvider.getLiveData();
     return Container(
       width: double.infinity,
       height: 200,
@@ -141,23 +307,62 @@ class InformationWidget extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 50),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text(
-                      "Cur CO2: 2 ppm",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    Text(
-                      "Avg CO2: 32 ppm",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    Text(
-                      "Over CO2: 500 ppm",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                  ],
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                child: SizedBox(
+                  width: size.width * 0.45,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Cur CO2:",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1!
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "Avg CO2:",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1!
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "Over CO2:",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1!
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _isLoading
+                                ? 'Loading...'
+                                : '${dataProvider.curCO2.toStringAsFixed(2)} ppm',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                          Text(
+                            '${dataProvider.memberNum <= 10 ? "302.00" : "645.00"} ppm',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                          Text(
+                            //TODO change
+                            '${dataProvider.memberNum <= 10 ? "702.00" : "1045.00"} ppm',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -179,6 +384,7 @@ class PeopleCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<Data>(context);
     return Container(
       height: 160,
       alignment: Alignment.center,
@@ -204,12 +410,21 @@ class PeopleCircle extends StatelessWidget {
           ),
         ],
       ),
-      child: const Text(
-        "5 People",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "${dataProvider.memberNum}",
+            style: const TextStyle(
+              fontSize: 22,
+              color: Colors.blue,
+            ),
+          ),
+          Text(
+            'People',
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
+          )
+        ],
       ),
     );
   }
@@ -253,7 +468,7 @@ class GreetingBar extends StatelessWidget {
           ),
           //TODO: add elevation
           leading: CircleAvatar(
-            backgroundImage: AssetImage("assets/images/avatar.jpg"),
+            backgroundImage: AssetImage("assets/images/avatar.png"),
             radius: 30,
           ),
         ),

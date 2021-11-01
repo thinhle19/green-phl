@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:green_phl/provider/data.dart';
@@ -19,32 +21,35 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (ctx) => Data(),
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.cyan,
-          fontFamily: "Poppins",
-          textTheme: const TextTheme(
-            headline1: TextStyle(
-              fontSize: 27,
-              color: Colors.black,
-            ),
-            bodyText1: TextStyle(
-              fontSize: 18,
-              color: Colors.black,
-            ),
-            bodyText2: TextStyle(
-              fontSize: 18,
-              color: Colors.cyan,
+      child: Consumer<Data>(
+        builder: (ctx, data, _) => MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.cyan,
+            fontFamily: "Poppins",
+            textTheme: const TextTheme(
+              headline1: TextStyle(
+                fontSize: 27,
+                color: Colors.black,
+              ),
+              bodyText1: TextStyle(
+                fontSize: 14,
+                color: Colors.black,
+              ),
+              bodyText2: TextStyle(
+                fontSize: 18,
+                color: Colors.cyan,
+              ),
             ),
           ),
+          debugShowCheckedModeBanner: false,
+          home: data.isInit ? const ManualScreen() : const SplashingScreen(),
+          // home: TeXViewDocumentExamples(),
+          routes: {
+            MainScreen.routeName: (context) => const MainScreen(),
+            ManualScreen.routeName: (context) => const ManualScreen(),
+          },
         ),
-        debugShowCheckedModeBanner: false,
-        home: const SplashingScreen(),
-        routes: {
-          MainScreen.routeName: (context) => const MainScreen(),
-          ManualScreen.routeName: (context) => const ManualScreen(),
-        },
       ),
     );
   }

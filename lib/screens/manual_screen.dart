@@ -37,10 +37,14 @@ class ManualScreen extends StatelessWidget {
 class DropdownFieldWidget extends StatefulWidget {
   final title;
   final List<String> listItem;
+  final initVal;
+  final Function callback;
   const DropdownFieldWidget({
     Key? key,
     required this.title,
     required this.listItem,
+    required this.initVal,
+    required this.callback,
   }) : super(key: key);
 
   @override
@@ -52,8 +56,14 @@ class _DropdownFieldWidgetState extends State<DropdownFieldWidget> {
   String dropdownValue = '';
 
   @override
+  void initState() {
+    // TODO: implement initState
+    dropdownValue = widget.initVal;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    dropdownValue = widget.listItem[0];
     return Column(
       children: [
         const SizedBox(
@@ -80,12 +90,13 @@ class _DropdownFieldWidgetState extends State<DropdownFieldWidget> {
           onChanged: (String? newValue) {
             setState(() {
               dropdownValue = newValue!;
+              widget.callback(newValue);
             });
           },
-          items: widget.listItem.map<DropdownMenuItem<String>>((String value) {
+          items: widget.listItem.map<DropdownMenuItem<String>>((String val) {
             return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
+              value: val,
+              child: Text(val),
             );
           }).toList(),
         ),
@@ -102,7 +113,7 @@ class ManualText extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
       child: Text(
-        "   Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
+        "The PHLAPP application is an electronic device-based application developed by the GREENPHL team that helps inform users about air quality, especially CO2 from the GREENPHL device placed in their enclosed space.\n\nIn addition to measuring the usual CO2 concentration, the device can assess whether the amount of CO2 is appropriate for the number of people in the room, there is a risk of COVID spread. From there, make recommendations to users on ventilation measures and adjust the appropriate number of people.\n\nThe PHLAPP application helps users collect information, adjust the air as well as the number of people in their enclosed space, limiting the possibility of COVID-19 infection.The application is applied in Vietnam.",
         style: Theme.of(context).textTheme.bodyText1,
       ),
     );
@@ -129,9 +140,11 @@ class _WalkthroughWidgetState extends State<WalkthroughWidget> {
       DropdownFieldWidget(
         title: 'Where does the device is placed now?',
         listItem: data.envTypes,
+        initVal: data.envTypes[0],
+        callback: data.changeEnvType,
       ),
       DropdownFieldWidget(
-        title: 'How many members are there in you environmet?',
+        title: 'How many members are there in you environment?',
         listItem: [
           '01',
           '03',
@@ -141,10 +154,13 @@ class _WalkthroughWidgetState extends State<WalkthroughWidget> {
           '07',
           '08',
           '09',
+          '10',
           'Other',
         ],
+        initVal: '01',
+        callback: data.changePeopleNum,
       ),
-      Column(
+      /* Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
@@ -201,8 +217,10 @@ class _WalkthroughWidgetState extends State<WalkthroughWidget> {
             ),
           )
         ],
-      )
+      ) */
     ];
+
+    var currentIndex = 0;
 
     return Column(
       children: [
@@ -211,6 +229,7 @@ class _WalkthroughWidgetState extends State<WalkthroughWidget> {
             controller: _controller,
             itemCount: _sample.length,
             itemBuilder: (BuildContext ctx, int index) {
+              currentIndex = index;
               return _sample[index];
             },
           ),
@@ -234,7 +253,12 @@ class _WalkthroughWidgetState extends State<WalkthroughWidget> {
               ),
               TextButton(
                 onPressed: () {
-                  _controller.nextPage(duration: _duration, curve: _curve);
+                  if (currentIndex == _sample.length - 1) {
+                    Navigator.of(context)
+                        .pushReplacementNamed(MainScreen.routeName);
+                  } else {
+                    _controller.nextPage(duration: _duration, curve: _curve);
+                  }
                 },
                 child: Text(
                   'Next',

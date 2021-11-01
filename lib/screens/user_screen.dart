@@ -11,6 +11,7 @@ class UserScreen extends StatelessWidget {
     return ScreenLayout(
       bottomFieldRatio: 0.65,
       titleChild: const TitleWithPic(
+        assetPath: 'assets/images/avatar.png',
         title: "Coby Lee",
       ),
       contentChild: ListView(

@@ -1,0 +1,90 @@
+{
+  "channel": {
+    "id": 1554577,
+    "name": "ProjectCo2",
+    "description": "Hackathon",
+    "latitude": "0.0",
+    "longitude": "0.0",
+    "field1": "co2",
+    "created_at": "2021-10-31T09:11:46Z",
+    "updated_at": "2021-10-31T09:12:00Z",
+    "last_entry_id": 90
+  },
+  "feeds": [
+    {
+      "created_at": "2021-10-31T09:41:00Z",
+      "entry_id": 76,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:41:17Z",
+      "entry_id": 77,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:41:34Z",
+      "entry_id": 78,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:41:51Z",
+      "entry_id": 79,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:42:08Z",
+      "entry_id": 80,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:42:25Z",
+      "entry_id": 81,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:42:41Z",
+      "entry_id": 82,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:42:58Z",
+      "entry_id": 83,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:43:30Z",
+      "entry_id": 84,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:43:46Z",
+      "entry_id": 85,
+      "field1": "379.36948"
+    },
+    {
+      "created_at": "2021-10-31T09:44:03Z",
+      "entry_id": 86,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:44:20Z",
+      "entry_id": 87,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:44:36Z",
+      "entry_id": 88,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:44:53Z",
+      "entry_id": 89,
+      "field1": "411.30020"
+    },
+    {
+      "created_at": "2021-10-31T09:45:10Z",
+      "entry_id": 90,
+      "field1": "411.30020"
+    }
+  ]
+}

@@ -8,28 +8,32 @@ class ListElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(
-              icon,
-              size: 30,
-              color: Colors.black,
+    return InkWell(
+      onTap: () {},
+      enableFeedback: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18.0),
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(
+                icon,
+                size: 30,
+                color: Colors.black,
+              ),
+              title: Text(
+                title,
+                style: TextStyle(fontSize: 17),
+              ),
+              trailing: Icon(Icons.arrow_forward_ios_rounded),
             ),
-            title: Text(
-              title,
-              style: TextStyle(fontSize: 17),
+            const Divider(
+              thickness: 1,
+              color: Colors.black45,
+              indent: 18,
             ),
-            trailing: Icon(Icons.arrow_forward_ios_rounded),
-          ),
-          const Divider(
-            thickness: 1,
-            color: Colors.black45,
-            indent: 18,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
