@@ -248,6 +248,8 @@ class InformationWidget extends StatefulWidget {
 class _InformationWidgetState extends State<InformationWidget> {
   var _isInit = true;
   var _isLoading = false;
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _textEditingController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -289,7 +291,6 @@ class _InformationWidgetState extends State<InformationWidget> {
   Widget build(BuildContext context) {
     final dataProvider = Provider.of<Data>(context);
     Size size = MediaQuery.of(context).size;
-    print('${size.height}   ${size.width}');
     // dataProvider.getLiveData();
     return Container(
       width: double.infinity,
@@ -309,7 +310,7 @@ class _InformationWidgetState extends State<InformationWidget> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 child: SizedBox(
-                  width: size.width * 0.45,
+                  width: size.width * 0.435,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -367,8 +368,99 @@ class _InformationWidgetState extends State<InformationWidget> {
               ),
             ),
           ),
-          const Positioned(
-            child: PeopleCircle(),
+          Positioned(
+            child: GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) {
+                    return AlertDialog(
+                      title: SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          "Update people number",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.lightGreenAccent,
+                            fontSize: 22,
+                          ),
+                        ),
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Form(
+                            key: _formKey,
+                            child: TextFormField(
+                              controller: _textEditingController,
+                              validator: (value) {
+                                return value!.isNotEmpty
+                                    ? null
+                                    : "Please UPDATE the number of people present in your env";
+                              },
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                  hintText: "Member number"),
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(ctx)
+                                .pop(dataProvider.memberNum.toString());
+                            // isShowDialog = false;
+                            // dataProvider.changeState();
+                          },
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.red[400]),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                            ),
+                          ),
+                          child: const Text(
+                            "No",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(ctx).pop(
+                                _textEditingController.text.isEmpty
+                                    ? dataProvider.memberNum.toString()
+                                    : _textEditingController.text.toString());
+                          },
+                          style: ButtonStyle(
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20))),
+                              ),
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.cyan)),
+                          child: const Text(
+                            "Update",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ).then((value) => dataProvider.changePeopleNum(value));
+              },
+              child: PeopleCircle(),
+            ),
             top: 20,
             bottom: 20,
             right: 40,
